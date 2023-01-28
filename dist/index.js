@@ -1806,7 +1806,6 @@ class Context {
 exports.Context = Context;
 //# sourceMappingURL=context.js.map
 
-
 /***/ }),
 
 /***/ 5438:
@@ -10071,7 +10070,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const request_error_1 = __nccwpck_require__(537);
 function approve(token, context, prNumber, reviewMessage) {
-    var _a, _b;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (!prNumber) {
             prNumber = (_a = context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
@@ -10090,16 +10089,13 @@ function approve(token, context, prNumber, reviewMessage) {
                 client.rest.pulls.get({ owner, repo, pull_number: prNumber }),
                 client.rest.pulls.listReviews({ owner, repo, pull_number: prNumber }),
             ]);
-            core.info(`Current user is ${login}`);
-            const prHead = pr.head.sha;
-            core.info(`Commit SHA is ${prHead}`);
-            const alreadyReviewed = reviews.some(({ user, commit_id, state }) => (user === null || user === void 0 ? void 0 : user.login) === login && commit_id == prHead && state === "APPROVED");
-            const outstandingReviewRequest = (_b = pr.requested_reviewers) === null || _b === void 0 ? void 0 : _b.some((reviewer) => reviewer.login == login);
-            if (alreadyReviewed && !outstandingReviewRequest) {
-                core.info(`Current user already approved pull request #${prNumber}, nothing to do`);
+            const alreadyReviewed = reviews.some(({ user, commit_id, state }) => state === "APPROVED");
+            const isLastReviewDismissed = reviews[reviews.length - 1].state === "DISMISSED";
+            if (alreadyReviewed && !isLastReviewDismissed) {
+                core.info(`Already approved`);
                 return;
             }
-            core.info(`Pull request #${prNumber} has not been approved yet, creating approving review`);
+            core.info(`Pull request #${prNumber} has been previously approved and dismissed, reapproving`);
             yield client.rest.pulls.createReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -10107,7 +10103,7 @@ function approve(token, context, prNumber, reviewMessage) {
                 body: reviewMessage,
                 event: "APPROVE",
             });
-            core.info(`Approved pull request #${prNumber}`);
+            core.info(`Reapproved pull request #${prNumber}`);
         }
         catch (error) {
             if (error instanceof request_error_1.RequestError) {

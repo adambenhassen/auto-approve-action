@@ -34,28 +34,17 @@ export async function approve(
       client.rest.pulls.listReviews({ owner, repo, pull_number: prNumber }),
     ]);
 
-    core.info(`Current user is ${login}`);
-
-    const prHead = pr.head.sha;
-    core.info(`Commit SHA is ${prHead}`);
-
-    const alreadyReviewed = reviews.some(
-      ({ user, commit_id, state }) =>
-        user?.login === login && commit_id == prHead && state === "APPROVED"
-    );
-    const outstandingReviewRequest = pr.requested_reviewers?.some(
-      (reviewer) => reviewer.login == login
-    );
-    if (alreadyReviewed && !outstandingReviewRequest) {
-      core.info(
-        `Current user already approved pull request #${prNumber}, nothing to do`
-      );
+    const alreadyReviewed = reviews.some(({ user, commit_id, state }) => state === "APPROVED");
+    const isLastReviewDismissed = reviews[reviews.length-1].state === "DISMISSED";
+    if (alreadyReviewed && !isLastReviewDismissed) {
+      core.info(`Already approved`);
       return;
     }
 
     core.info(
-      `Pull request #${prNumber} has not been approved yet, creating approving review`
+      `Pull request #${prNumber} has been previously approved and dismissed, reapproving`
     );
+
     await client.rest.pulls.createReview({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -63,7 +52,9 @@ export async function approve(
       body: reviewMessage,
       event: "APPROVE",
     });
-    core.info(`Approved pull request #${prNumber}`);
+
+    core.info(`Reapproved pull request #${prNumber}`);
+
   } catch (error) {
     if (error instanceof RequestError) {
       switch (error.status) {
