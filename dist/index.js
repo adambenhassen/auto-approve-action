@@ -10089,7 +10089,9 @@ function approve(token, context, prNumber, reviewMessage) {
                 client.rest.pulls.get({ owner, repo, pull_number: prNumber }),
                 client.rest.pulls.listReviews({ owner, repo, pull_number: prNumber }),
             ]);
-            const alreadyReviewed = reviews.some(({ user, commit_id, state }) => state === "APPROVED");
+            if (reviews.length == 0)
+                return;
+            const alreadyReviewed = reviews.some(({ state }) => state === "APPROVED");
             const isLastReviewDismissed = reviews[reviews.length - 1].state === "DISMISSED";
             if (alreadyReviewed && !isLastReviewDismissed) {
                 core.info(`Already approved`);
