@@ -10070,7 +10070,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const request_error_1 = __nccwpck_require__(537);
 function approve(token, context, prNumber, reviewMessage) {
-    var _a, _b, _c;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (!prNumber) {
             prNumber = (_a = context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
@@ -10093,19 +10093,14 @@ function approve(token, context, prNumber, reviewMessage) {
             console.log(reviews);
             if (reviews.length == 0)
                 return;
-            const alreadyReviewed = reviews.some(({ state }) => state === "APPROVED");
-            if (!alreadyReviewed) {
-                core.info(`Had not been approved`);
+            const alreadyApproved = reviews.some(({ state }) => state === "APPROVED");
+            if (alreadyApproved) {
+                core.info("Already approved");
                 return;
             }
-            const isLastReviewDismissed = reviews[reviews.length - 1].state === "DISMISSED";
-            if (!isLastReviewDismissed) {
+            const someReviewWasDismissed = reviews.some(({ state }) => state === "DISMISSED");
+            if (!someReviewWasDismissed) {
                 core.info(`Had not been dismissed`);
-                return;
-            }
-            const dismissedByAuthor = ((_b = reviews[reviews.length - 1].user) === null || _b === void 0 ? void 0 : _b.login) != ((_c = pr === null || pr === void 0 ? void 0 : pr.user) === null || _c === void 0 ? void 0 : _c.login);
-            if (!dismissedByAuthor) {
-                core.info(`Had not been dismissed by author`);
                 return;
             }
             core.info(`Pull request #${prNumber} has been previously approved and dismissed, reapproving`);
@@ -10113,7 +10108,7 @@ function approve(token, context, prNumber, reviewMessage) {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber,
-                body: reviewMessage,
+                body: "Pull request has been previously approved and dismissed, reapproving.",
                 event: "APPROVE",
             });
             core.info(`Reapproved pull request #${prNumber}`);

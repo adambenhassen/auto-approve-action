@@ -39,21 +39,15 @@ export async function approve(
 
     if (reviews.length == 0) return
 
-    const alreadyReviewed = reviews.some(({ state }) => state === "APPROVED");
-    if (!alreadyReviewed) {
-      core.info(`Had not been approved`);
+    const alreadyApproved = reviews.some(({ state }) => state === "APPROVED");
+    if (alreadyApproved) {
+      core.info("Already approved");
       return
     }
 
-    const isLastReviewDismissed = reviews[reviews.length-1].state === "DISMISSED";
-    if (!isLastReviewDismissed) {
+    const someReviewWasDismissed = reviews.some(({ state }) => state === "DISMISSED");
+    if (!someReviewWasDismissed) {
       core.info(`Had not been dismissed`);
-      return;
-    }
-
-    const dismissedByAuthor = reviews[reviews.length-1].user?.login != pr?.user?.login;
-    if (!dismissedByAuthor) {
-      core.info(`Had not been dismissed by author`);
       return;
     }
 
@@ -65,7 +59,7 @@ export async function approve(
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: prNumber,
-      body: reviewMessage,
+      body: "Pull request has been previously approved and dismissed, reapproving.",
       event: "APPROVE",
     });
 
