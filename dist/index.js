@@ -10089,6 +10089,7 @@ function approve(token, context, prNumber, reviewMessage) {
                 client.rest.pulls.get({ owner, repo, pull_number: prNumber }),
                 client.rest.pulls.listReviews({ owner, repo, pull_number: prNumber }),
             ]);
+            console.log(pr);
             console.log(reviews);
             if (reviews.length == 0)
                 return;
