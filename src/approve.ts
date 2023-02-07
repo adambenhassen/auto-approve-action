@@ -38,7 +38,7 @@ export async function approve(
     console.log(reviews)
 
     if (reviews.length == 0) return
-    
+
     const alreadyReviewed = reviews.some(({ state }) => state === "APPROVED");
     if (!alreadyReviewed) {
       core.info(`Had not been approved`);
@@ -48,6 +48,12 @@ export async function approve(
     const isLastReviewDismissed = reviews[reviews.length-1].state === "DISMISSED";
     if (!isLastReviewDismissed) {
       core.info(`Had not been dismissed`);
+      return;
+    }
+
+    const dismissedByAuthor = reviews[reviews.length-1].user?.login != pr?.user?.login;
+    if (!dismissedByAuthor) {
+      core.info(`Had not been dismissed by author`);
       return;
     }
 
