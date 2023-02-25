@@ -10098,17 +10098,11 @@ function approve(token, context, prNumber, reviewMessage) {
                 core.info("Already approved");
                 return;
             }
-            const someReviewWasDismissed = reviews.some(({ state }) => state === "DISMISSED");
-            if (!someReviewWasDismissed) {
-                core.info(`Had not been dismissed`);
-                return;
-            }
-            core.info(`Pull request #${prNumber} has been previously approved and dismissed, reapproving`);
             yield client.rest.pulls.createReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber,
-                body: "Pull request has been previously approved and dismissed, reapproving.",
+                body: "",
                 event: "APPROVE",
             });
             core.info(`Reapproved pull request #${prNumber}`);
