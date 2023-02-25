@@ -34,22 +34,11 @@ export async function approve(
       client.rest.pulls.listReviews({ owner, repo, pull_number: prNumber }),
     ]);
 
-    console.log(pr)
-    console.log(reviews)
-
-    if (reviews.length == 0) return
-
-    const alreadyApproved = reviews.some(({ state }) => state === "APPROVED");
-    if (alreadyApproved) {
-      core.info("Already approved");
-      return
-    }
-
     await client.rest.pulls.createReview({
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: prNumber,
-      body: "",
+      body: "Pull request has been previously approved and dismissed, reapproving.",
       event: "APPROVE",
     });
 
