@@ -10093,7 +10093,7 @@ function approve(token, context, prNumber, reviewMessage) {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber,
-                body: "Pull request has been previously approved and dismissed, reapproving.",
+                body: "",
                 event: "APPROVE",
             });
             core.info(`Reapproved pull request #${prNumber}`);

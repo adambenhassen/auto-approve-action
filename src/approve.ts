@@ -38,7 +38,7 @@ export async function approve(
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: prNumber,
-      body: "Pull request has been previously approved and dismissed, reapproving.",
+      body: "",
       event: "APPROVE",
     });
 
